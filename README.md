@@ -1,96 +1,94 @@
-# roadstreaming
+# RoadStreaming -- Per-Character Frame Streaming
 
+Each character is a frame. Typing as fast as thinking.
 
+Text IS video. A 100-character sentence = 3.3 seconds of movie at 30 fps.
+A full LLM response streams as a film you watch being written.
 
-![blackroad](https://img.shields.io/badge/blackroad-black?style=flat-square) 
+## How It Works
 
-[![BlackRoad OS](https://img.shields.io/badge/BlackRoad-OS-FF1D6C?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkw0IDdWMTdMNyAyMEwxMiAxNUwxNyAyMEwyMCAxN1Y3TDEyIDJ6IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==)](https://blackroad.io)
-[![License](https://img.shields.io/badge/license-Proprietary-9C27B0?style=for-the-badge)](LICENSE)
+CharFrame renders every character of text into its own video frame.
+Black background, white monospace text, pink cursor advancing one
+character at a time. A status bar tracks frame count, progress,
+characters per second, and elapsed time.
 
-## Overview
+The result: text that plays like a movie. You watch the words appear
+at exactly the speed they were produced -- whether typed, piped, or
+streamed from an LLM.
 
-Part of the **BlackRoad OS** ecosystem - The Road to AI Sovereignty 🛣️
-
-## Quick Start
+## CLI Usage
 
 ```bash
-# Clone the repository
-git clone https://github.com/BlackRoad-OS/roadstreaming.git
-cd roadstreaming
+# Render text to MP4 (each char = 1 frame at 30fps)
+python charframe.py "Hello world"
 
-# Install dependencies (if applicable)
-npm install  # or pip install -r requirements.txt
+# Demo mode (built-in message)
+python charframe.py
 
-# Run the service
-npm start    # or python main.py
+# Read from stdin
+echo "Some text" | python charframe.py --stdin
+
+# Stream from Ollama (each token rendered char-by-char)
+python charframe.py --ollama "Explain gravity in 3 sentences"
+python charframe.py --ollama --model llama3 "What is BlackRoad?"
+
+# Raw frames to stdout (pipe to ffplay for live preview)
+python charframe.py --stream "Watch this" | \
+  ffplay -f rawvideo -pixel_format rgb24 -video_size 1280x720 -
+
+# Custom FPS and output filename
+python charframe.py --fps 24 --output demo.mp4 "Slower render"
 ```
 
-## Features
+## Live Server
 
-- 🖤 **Enterprise-Grade** - Production-ready infrastructure
-- ⚡ **High Performance** - Optimized for speed and efficiency
-- 🔒 **Secure by Default** - Built with security best practices
-- 🌐 **Cloud-Native** - Designed for modern cloud deployment
-- 📊 **Observable** - Comprehensive logging and metrics
+CharFrame Live serves an MJPEG stream over HTTP. Open a browser,
+type a prompt, and watch the LLM response render frame-by-frame.
 
-## Architecture
+```bash
+# Start the server
+python charframe-live.py
 
-This service is part of the BlackRoad OS distributed system:
-
-```
-┌─────────────────────────────────────────────────┐
-│                 BlackRoad OS                    │
-├─────────────────────────────────────────────────┤
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐         │
-│  │   API   │  │ Services│  │  Edge   │         │
-│  │ Gateway │──│  Layer  │──│  Nodes  │         │
-│  └─────────┘  └─────────┘  └─────────┘         │
-│       │            │            │              │
-│       └────────────┴────────────┘              │
-│                    │                           │
-│            ┌───────────────┐                   │
-│            │  roadstreaming  │  ◀── You are here │
-│            └───────────────┘                   │
-└─────────────────────────────────────────────────┘
+# Start on a custom port
+python charframe-live.py --port 9000 --fps 24
 ```
 
-## Configuration
+Endpoints:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Service port | `3000` |
-| `LOG_LEVEL` | Logging verbosity | `info` |
-| `NODE_ENV` | Environment | `development` |
+| Path | Description |
+|------|-------------|
+| `/` | Web UI with prompt input |
+| `/mjpeg?prompt=...` | MJPEG stream of CharFrame output |
+| `/health` | JSON health check |
 
-## API Reference
+The MJPEG stream works in any browser -- no JavaScript required for
+the video itself. The final frame holds for 3 seconds after the
+response completes.
 
-See the [API Documentation](https://docs.blackroad.io) for full reference.
+## Requirements
 
-## Contributing
+- Python 3.10+
+- Pillow (`pip install pillow`)
+- ffmpeg (for MP4 output in CLI mode)
+- Ollama (optional, for LLM streaming)
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+```bash
+pip install -r requirements.txt
+```
+
+## Frame Specs
+
+| Property | Value |
+|----------|-------|
+| Resolution | 1280 x 720 |
+| Background | Black (#000000) |
+| Text | White, monospace |
+| Cursor | Pink (#FF1D6C) |
+| Columns | 80 |
+| Default FPS | 30 |
+| Format (CLI) | H.264 MP4 via ffmpeg |
+| Format (Live) | MJPEG over HTTP |
 
 ## License
 
-**Proprietary** - BlackRoad OS, Inc. All rights reserved.
-
-This software is provided for authorized use only. See [LICENSE](LICENSE) for details.
-
-## Related Projects
-
-- [blackroad-os-core](https://github.com/BlackRoad-OS/blackroad-os-core) - Core system
-- [blackroad-api](https://github.com/BlackRoad-OS/blackroad-api) - API Gateway
-- [blackroad-memory](https://github.com/BlackRoad-OS/blackroad-memory) - Memory System
-
----
-
-<p align="center">
-  <strong>🛣️ The Road to AI Sovereignty</strong><br>
-  <a href="https://blackroad.io">blackroad.io</a> •
-  <a href="https://docs.blackroad.io">Documentation</a> •
-  <a href="https://github.com/BlackRoad-OS">GitHub</a>
-</p>
+Proprietary -- BlackRoad OS, Inc. All rights reserved.
